@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SONIC XIT - Premium Access</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
+    <style>
+        :root { --bg: #060608; --glow: #00A3FF; --inp: #161A22; --border: #252A35; --text: #FFF; --succ: #00FF66; --dang: #FF3B30; --panel-bg: #0d1117; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Cairo', sans-serif; user-select: none; }
+        body { background: var(--bg); color: var(--text); display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; transition: 0.3s;}
+        .container { width: 100%; max-width: 420px; position: relative;}
+        
+        .screen { display: none; flex-direction: column; align-items: center; animation: fadeIn 0.3s ease; width: 100%;}
+        .screen.active { display: flex; }
+        
+        /* شاشة الدخول */
+        #login-screen { text-align: center; }
+        .logo-title { font-family: 'Orbitron'; font-size: 45px; font-weight: 900; font-style: italic; line-height: 1; }
+        .logo-title .sonic { color: #FFF; } .logo-title .xit { color: var(--glow); }
+        .logo-sub { color: var(--glow); font-family: 'Orbitron'; font-weight: bold; font-size: 18px; margin-top: -5px; }
+        .sub-text { color: #8E95A3; font-size: 14px; margin-bottom: 20px; }
+        
+        input, select { width: 100%; padding: 14px; border-radius: 10px; border: 1px solid var(--border); background: var(--inp); color: #FFF; text-align: center; outline: none; margin-bottom: 10px; }
+        .btn { width: 100%; padding: 14px; border-radius: 10px; border: none; background: linear-gradient(90deg, #0056b3, #00A3FF); color: #FFF; font-weight: bold; font-size: 16px; cursor: pointer; margin-bottom: 10px; }
+        
+        .tabs { display: flex; width: 100%; gap: 10px; margin-bottom: 15px; }
+        .tab { flex: 1; padding: 10px; border: none; border-radius: 8px; background: var(--inp); color: #8E95A3; cursor: pointer; font-weight: bold; font-size: 13px;}
+        .tab.active { background: var(--glow); color: #000; }
+
+        /* لوحة الأدمن */
+        #admin-screen { text-align: right; }
+        .admin-panel { background: var(--panel-bg); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 15px; }
+        .admin-panel h3 { color: var(--glow); font-size: 16px; margin-bottom: 15px; text-align: center;}
+        .user-item { background: var(--inp); border: 1px solid var(--border); border-radius: 8px; padding: 10px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;}
+        .user-item span { font-family: 'Orbitron'; color: var(--glow); }
+        .del-btn { background: rgba(255,59,48,0.1); color: var(--dang); border: 1px solid var(--dang); padding: 5px 10px; border-radius: 6px; cursor: pointer; }
+
+        /* لوحة الموزع */
+        #reseller-screen { text-align: right; }
+        .reseller-code-box { text-align: center; margin-bottom: 20px; }
+        .reseller-code-box h4 { color: #8E95A3; font-size: 12px; letter-spacing: 2px; margin-bottom: 5px; }
+        .reseller-code-big { font-family: 'Orbitron'; font-size: 24px; color: var(--glow); font-weight: bold; text-shadow: 0 0 15px rgba(0,163,255,0.6); }
+
+        .balance-card { background: var(--panel-bg); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 15px; text-align: center; }
+        .balance-title { color: #8E95A3; font-size: 12px; letter-spacing: 2px; margin-bottom: 5px; }
+        .balance-amount { font-family: 'Orbitron'; font-size: 36px; font-weight: 900; color: var(--succ); }
+        .balance-sub { color: #8E95A3; font-size: 12px; margin-top: 5px; }
+        .balance-sub span { color: var(--glow); }
+
+        .panel { background: var(--panel-bg); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 15px; }
+        .panel-title { color: var(--glow); font-size: 14px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; font-weight:bold; }
+        
+        /* العداد المكبر */
+        .gen-container { display: flex; gap: 10px; margin-bottom: 10px; align-items: stretch; }
+        .counter-box { display: flex; flex-direction: column; background: var(--inp); border: 1px solid var(--border); border-radius: 8px; width: 75px; overflow: hidden; justify-content: space-between;}
+        .counter-box button { background: transparent; border: none; color: var(--glow); font-size: 18px; cursor: pointer; padding: 8px; transition: 0.2s; }
+        .counter-box button:hover { background: rgba(0,163,255,0.1); }
+        .counter-box input { border: none; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); background: transparent; color: #FFF; text-align: center; font-size: 20px; font-family: 'Orbitron'; padding: 8px 0; margin: 0; outline: none; width: 100%; }
+        .counter-box input::-webkit-outer-spin-button, .counter-box input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+
+        .gen-btn { flex: 1; background: #007bff; color: #FFF; padding: 14px; border-radius: 8px; font-weight: bold; border:none; cursor:pointer; font-size: 16px; box-shadow: 0 0 15px rgba(0,123,255,0.3); display: flex; align-items: center; justify-content: center;}
+        
+        .keys-container { width: 100%; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+        .keys-header { display: grid; grid-template-columns: 30px 1fr 50px 80px 70px; background: #11151c; padding: 10px; color: #58a6ff; font-size: 12px; font-weight: bold; text-align: center; }
+        .key-row { display: grid; grid-template-columns: 30px 1fr 50px 80px 70px; padding: 12px 10px; border-bottom: 1px solid var(--border); align-items: center; font-size: 13px; text-align: center; }
+        .key-row:last-child { border-bottom: none; }
+        .key-name { font-family: 'Orbitron'; color: #58a6ff; font-size: 11px; word-break: break-all; text-align: right;}
+        .key-status { color: var(--succ); border: 1px solid var(--succ); padding: 2px 6px; border-radius: 10px; font-size: 10px; background: rgba(0,255,102,0.1);}
+        .key-status.used { color: var(--dang); border-color: var(--dang); background: rgba(255,59,48,0.1);}
+        .key-actions { display: flex; gap: 5px; justify-content: center; }
+        .icon-btn { background: var(--inp); border: 1px solid var(--border); color: #8E95A3; width: 28px; height: 28px; border-radius: 6px; cursor: pointer; display: flex; justify-content: center; align-items: center;}
+        
+
+        #toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: var(--glow); color: white; padding: 10px 20px; border-radius: 8px; opacity: 0; transition: 0.3s; pointer-events: none; z-index: 100; font-weight:bold;}
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    </style>
+
+    <style id="sonic-redesign">
+      :root{
+        --bg:#03060d;--panel-bg:rgba(8,15,29,.92);--inp:#0b1424;
+        --border:rgba(0,163,255,.28);--glow:#08baff;--succ:#00ef83;
+        --dang:#ff4964;--text:#f4f8ff;
+      }
+      *{box-sizing:border-box}
+      body{
+        min-height:100vh;padding:28px 18px;display:block;overflow-x:hidden;
+        color:var(--text);
+        background:
+          radial-gradient(ellipse at 12% 12%,rgba(0,115,255,.20),transparent 34%),
+          radial-gradient(ellipse at 88% 80%,rgba(0,195,255,.13),transparent 32%),
+          linear-gradient(145deg,#02040a,#07101e 55%,#02050b);
+      }
+      body:before{
+        content:"";position:fixed;inset:0;pointer-events:none;opacity:.22;
+        background-image:linear-gradient(rgba(0,174,255,.08) 1px,transparent 1px),
+          linear-gradient(90deg,rgba(0,174,255,.08) 1px,transparent 1px);
+        background-size:38px 38px;mask-image:linear-gradient(to bottom,black,transparent 90%);
+      }
+      .container{width:min(100%,1120px);max-width:1120px;margin:0 auto;position:relative;z-index:1}
+      .screen{gap:18px;align-items:stretch}
+      .logo-title{font-size:clamp(42px,7vw,68px);letter-spacing:2px;text-shadow:0 0 24px rgba(0,163,255,.38)}
+      .logo-title .sonic{color:#fff}.logo-title .xit{color:#08baff}
+      .logo-sub{font-size:14px;letter-spacing:8px;margin:5px 0 8px}
+      .sub-text{font-size:15px;color:#9db4ce;margin-bottom:12px}
+      #login-screen{
+        max-width:470px;margin:5vh auto 0;padding:38px 30px 30px;
+        background:linear-gradient(145deg,rgba(10,20,38,.96),rgba(4,9,18,.97));
+        border:1px solid rgba(0,174,255,.45);border-radius:25px;
+        box-shadow:0 0 0 1px rgba(0,174,255,.08),0 22px 70px rgba(0,0,0,.55),0 0 42px rgba(0,140,255,.12);
+      }
+      .tabs{padding:5px;background:#050b15;border:1px solid var(--border);border-radius:13px}
+      .tab{border-radius:9px;padding:12px;background:transparent;color:#9bb0c9}
+      .tab.active{background:linear-gradient(100deg,#006dce,#08baff);color:#00101c;box-shadow:0 0 20px rgba(0,163,255,.3)}
+      input,select{
+        background:#070f1d;border:1px solid rgba(93,150,204,.25);color:#fff;
+        border-radius:12px;padding:15px;margin-bottom:12px;transition:.2s;
+      }
+      input:focus,select:focus{border-color:var(--glow);box-shadow:0 0 0 3px rgba(0,163,255,.12)}
+      .btn,.gen-btn{
+        background:linear-gradient(100deg,#0065c9,#08baff);border:1px solid rgba(112,213,255,.5);
+        border-radius:12px;box-shadow:0 8px 25px rgba(0,125,255,.18);transition:transform .2s,filter .2s;
+      }
+      .btn:hover,.gen-btn:hover{filter:brightness(1.12);transform:translateY(-2px)}
+      #admin-screen,#reseller-screen{max-width:100%;text-align:right}
+      #admin-screen .logo-title{font-size:clamp(28px,4vw,42px);text-align:center;margin:8px 0}
+      .admin-panel,.panel,.balance-card{
+        background:linear-gradient(145deg,rgba(10,20,37,.96),rgba(5,11,21,.96));
+        border:1px solid rgba(0,163,255,.25);border-radius:19px;padding:22px;
+        box-shadow:0 12px 35px rgba(0,0,0,.22);
+      }
+      .admin-panel h3,.panel-title{color:#20c5ff}
+      .reseller-code-box{
+        padding:22px;border:1px solid rgba(0,163,255,.35);border-radius:18px;
+        background:linear-gradient(110deg,rgba(0,91,170,.17),rgba(8,15,29,.9));
+      }
+      .reseller-code-big{font-size:clamp(22px,4vw,34px)}
+      .balance-card{position:relative;overflow:hidden}
+      .balance-card:after{
+        content:"";position:absolute;width:180px;height:180px;border-radius:50%;
+        background:rgba(0,239,131,.07);filter:blur(10px);top:-100px;left:-50px;
+      }
+      .balance-amount{font-size:clamp(34px,6vw,48px);text-shadow:0 0 22px rgba(0,239,131,.18)}
+      .gen-container{gap:12px}
+      .counter-box{border-radius:12px;border-color:var(--border);min-width:76px}
+      .counter-box button{font-size:20px}
+      .gen-btn{min-height:58px;font-size:17px}
+      .keys-container{border:0;overflow-x:auto;background:#050b15;border-radius:13px}
+      .keys-header,.key-row{min-width:650px;grid-template-columns:34px minmax(170px,1fr) 62px 90px 112px}
+      .keys-header{background:#0b1a2d;color:#36caff}
+      .key-row{background:rgba(8,17,31,.8);border-bottom:1px solid rgba(80,140,190,.13)}
+      .key-row:nth-child(even){background:rgba(13,27,47,.8)}
+      .key-name{font-size:12px;color:#a9dfff}
+      .key-status{white-space:nowrap}
+      .icon-btn{min-width:46px;min-height:40px;padding:0 8px;width:auto;border-radius:9px;color:#c9e8ff;border-color:rgba(0,163,255,.25);font-size:15px}
+      .user-item{background:#081426;border-color:rgba(0,163,255,.2);border-radius:12px;padding:13px}
+      .del-btn{border-radius:8px}
+      #toast{
+        bottom:24px;background:#087fc5;border:1px solid #54ceff;
+        box-shadow:0 8px 28px rgba(0,140,255,.28);border-radius:12px;
+      }
+      a{color:#38caff!important}
+      @media(min-width:850px){
+        body:has(#reseller-screen.active) .container{max-width:1120px}
+        #reseller-screen{
+          display:grid;grid-template-columns:minmax(0,1.55fr) minmax(260px,.75fr);
+          grid-template-areas:"top top" "generator side" "keys keys" "logout logout";
+          gap:18px;align-items:start;
+        }
+        .reseller-code-box{grid-area:top;text-align:center}
+        .balance-card{grid-area:side;align-self:stretch;display:flex;flex-direction:column;justify-content:center;min-height:170px}
+        #reseller-screen .panel:first-of-type{grid-area:generator}
+        #reseller-screen .panel:nth-of-type(2){grid-area:keys}
+        #reseller-screen>.btn{grid-area:logout;max-width:220px;justify-self:center}
+      }
+      @media(max-width:600px){
+        body{padding:14px 10px}
+        #login-screen{margin:4vh auto 0;padding:30px 20px 24px}
+        .panel,.admin-panel,.balance-card{padding:16px}
+        .reseller-code-box{padding:17px}
+        .panel-title{font-size:13px}
+        .keys-header,.key-row{min-width:590px}
+      }
+    </style>
+
+
+    <style id="keys-actions-layout">
+      .keys-container{overflow:visible}
+      .keys-header,.key-row{
+        min-width:0!important;
+        grid-template-columns:30px minmax(0,1fr) 88px 145px!important;
+        align-items:center;
+        gap:8px;
+      }
+      .keys-header{padding:13px 10px}
+      .key-row{padding:15px 10px}
+      .key-name{font-size:clamp(10px,2.7vw,13px);text-align:center;overflow-wrap:anywhere}
+      .key-actions{display:flex;flex-wrap:nowrap;gap:6px;justify-content:center}
+      .key-actions .icon-btn{min-width:64px;min-height:38px;padding:5px 7px;font-size:12px;white-space:nowrap}
+      .copy-action{color:#53d5ff;border-color:#168dc7;background:rgba(0,163,255,.10)}
+      .delete-action{color:#ff7183;border-color:#a9364a;background:rgba(255,59,85,.09)}
+      @media(max-width:600px){
+        .keys-header,.key-row{grid-template-columns:22px minmax(0,1fr) 78px 132px!important;gap:4px;padding-left:6px;padding-right:6px}
+        .key-actions{gap:4px}
+        .key-actions .icon-btn{min-width:62px;min-height:36px;padding:4px;font-size:11px}
+      }
+    </style>
+
+</head>
+<body>
+    <div id="toast">تم!</div>
+    
+    <div class="container">
+        
+        <!-- شاشة الدخول -->
+        <div id="login-screen" class="screen active">
+            <div class="logo-title"><span class="sonic">SONIC</span> <span class="xit">XIT</span></div>
+            <div class="logo-sub">CLIENT</div>
+            <div class="sub-text">لوحة تحكم الموزعين</div>
+            
+            <div class="tabs">
+                <button id="tab-res" class="tab active" onclick="switchTab('res')">دخول الموزع</button>
+                <button id="tab-admin" class="tab" onclick="switchTab('admin')">أدمن</button>
+            </div>
+
+            <div id="sec-res" style="width:100%;">
+                <input type="text" id="res-user" placeholder="اسم المستخدم">
+                <input type="password" id="res-pass" placeholder="كلمة المرور">
+                <button class="btn" onclick="loginReseller()">تسجيل دخول الموزع</button>
+            </div>
+
+            <div id="sec-admin" style="width:100%; display:none;">
+                <input type="password" id="admin-pass" placeholder="كلمة مرور الأدمن">
+                <button class="btn" onclick="loginAdmin()">دخول الأدمن</button>
+            </div>
+
+            <div style="margin-top: 20px; color: #8E95A3; font-size: 13px;">
+                تواصل مع الدعم.<br><a href="https://t.me/Sonic_JO" target="_blank" style="color:var(--glow); text-decoration:none; font-weight:bold;">@Sonic_JO</a>
+            </div>
+        </div>
+
+        <!-- لوحة الأدمن -->
+        <div id="admin-screen" class="screen">
+            <div class="logo-title" style="font-size:30px; margin-bottom:15px;">لوحة الأدمن</div>
+            
+            <div class="admin-panel">
+                <h3>إضافة موزع جديد</h3>
+                <input type="text" id="new-user" placeholder="اسم الموزع (Username)">
+                <input type="password" id="new-pass" placeholder="كلمة المرور (Password)">
+                <button class="btn" style="background:#238636;" onclick="createReseller()">إنشاء الحساب الآن</button>
+            </div>
+
+            <div class="admin-panel">
+                <h3>إدارة الموزعين الحاليين</h3>
+                <div id="admin-users-list"></div>
+            </div>
+            
+            <button class="btn" style="background:#FF3B30;" onclick="logout()">خروج</button>
+        </div>
+
+        <!-- لوحة الموزع -->
+        <div id="reseller-screen" class="screen">
+            <div class="reseller-code-box">
+                <h4>YOUR RESELLER CODE</h4>
+                <div class="reseller-code-big" id="disp-res-code">SONIC...</div>
+            </div>
+
+            <div class="balance-card">
+                <div class="balance-title">YOUR BALANCE</div>
+                <div class="balance-amount" id="balance-amount">230.00</div>
+                <div class="balance-sub">Created <span id="key-count">0</span> keys</div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-title">GENERATE KEYS 🔑</div>
+                <select id="days">
+                    <option value="0.041" data-price="0.50">1 Hour — 0.50</option>
+                    <option value="0.125" data-price="1.00">3 Hours — 1.00</option>
+                    <option value="0.25" data-price="1.50">6 Hours — 1.50</option>
+                    <option value="0.5" data-price="2.00">12 Hours — 2.00</option>
+                    <option value="1" data-price="2.50">24 Hours — 2.50</option>
+                    <option value="3" data-price="3.50">3 Days — 3.50</option>
+                    <option value="7" data-price="4.50">7 Days — 4.50</option>
+                    <option value="15" data-price="6.00">15 Days — 6.00</option>
+                    <option value="30" data-price="8.00">30 Days — 8.00</option>
+                </select>
+                
+                <div class="gen-container">
+                    <div class="counter-box">
+                        <button onclick="changeCount(1)">▲</button>
+                        <input type="number" id="key-count-input" value="1" min="1" max="50" readonly>
+                        <button onclick="changeCount(-1)">▼</button>
+                    </div>
+                    <button class="gen-btn" id="gen-btn" onclick="genKey()">GENERATE KEYS 🔑</button>
+                </div>
+            </div>
+            
+            <div class="panel">
+                <div class="panel-title">
+                    <span>MY KEYS 🔑</span>
+                    <button style="background: rgba(255,59,48,0.1); color: var(--dang); border: 1px solid var(--dang); padding: 4px 10px; border-radius: 6px; cursor: pointer;" onclick="deleteAll()">🗑️ حذف الكل</button>
+                </div>
+                <div class="keys-container">
+                    <div class="keys-header"><div>#</div><div>KEY</div><div>STATUS</div><div>ACTIONS</div></div>
+                    <div id="keys-list"></div>
+                </div>
+            </div>
+            <button class="btn" style="background:#FF3B30;" onclick="logout()">خروج</button>
+        </div>
+
+    </div>
+
+    <script>
+        const BIN_ID = "6af38208ffd5d16053b7be3b";
+        const API_KEY = "$2a$10$hwehRSCL5qz8WnzrHvHiAup6Xqjpv15c1vwCl0QxHxyCNaq90TrO.";
+        const API_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
+
+        let currentReseller = null, currentBalance = 230.00;
+        let lastGeneratedCode = "";
+
+        function toast(m) { const el = document.getElementById('toast'); el.innerText = m; el.style.opacity = 1; setTimeout(()=>el.style.opacity=0, 3000); }
+        function switchScreen(id) { document.querySelectorAll('.screen').forEach(e=>e.classList.remove('active')); document.getElementById(id).classList.add('active'); }
+        function switchTab(t) { 
+            document.getElementById('tab-res').classList.toggle('active', t==='res'); 
+            document.getElementById('tab-admin').classList.toggle('active', t==='admin'); 
+            document.getElementById('sec-res').style.display = t==='res'?'block':'none'; 
+            document.getElementById('sec-admin').style.display = t==='admin'?'block':'none'; 
+        }
+        
+        async function fetchDB() { const r = await fetch(`${API_URL}/latest`, {headers:{'X-Master-Key':API_KEY}}); const d = await r.json(); return d.record || {}; }
+        async function saveDB(db) { await fetch(API_URL, {method:'PUT', headers:{'Content-Type':'application/json','X-Master-Key':API_KEY}, body:JSON.stringify(db)}); }
+
+        // ========== دوال الأدمن ==========
+        window.loginAdmin = function() {
+            if(document.getElementById('admin-pass').value.trim() === "SONIC112211") {
+                switchScreen('admin-screen');
+                renderAdmin();
+            } else { toast("كلمة مرور خاطئة"); }
+        };
+        
+        window.createReseller = async function() {
+            const u = document.getElementById('new-user').value.trim(), p = document.getElementById('new-pass').value.trim();
+            if(!u||!p) return toast("أدخل البيانات");
+            const db = await fetchDB();
+            if(!db.users) db.users = {};
+            if(db.users[u]) return toast("الاسم موجود مسبقاً");
+            db.users[u] = { password: p, balance: 230.00 };
+            await saveDB(db);
+            document.getElementById('new-user').value = ''; document.getElementById('new-pass').value = '';
+            toast("تم الإنشاء"); renderAdmin();
+        };
+
+        window.renderAdmin = async function() {
+            const list = document.getElementById('admin-users-list');
+            list.innerHTML = 'Loading...';
+            const db = await fetchDB();
+            list.innerHTML = '';
+            if(!db.users || Object.keys(db.users).length === 0) { list.innerHTML = '<div style="text-align:center; color:#8E95A3;">لا يوجد موزعين</div>'; return; }
+            for(let u in db.users) {
+                const div = document.createElement('div'); div.className='user-item';
+                div.innerHTML = `<div><span>${u}</span><br><small style="color:#8E95A3;">Pass: ${db.users[u].password}</small></div><button class="del-btn" onclick="deleteReseller('${u}')">حذف</button>`;
+                list.appendChild(div);
+            }
+        };
+
+        window.deleteReseller = async function(u) {
+            if(!confirm("حذف الموزع؟")) return;
+            const db = await fetchDB(); delete db.users[u]; await saveDB(db); renderAdmin();
+        };
+
+        // ========== دوال الموزع ==========
+        window.loginReseller = async function() {
+            const u = document.getElementById('res-user').value.trim(), p = document.getElementById('res-pass').value.trim();
+            if(!u||!p) return toast("أدخل البيانات");
+            const db = await fetchDB();
+            if(!db.users||!db.users[u]||db.users[u].password!==p) return toast("خطأ في البيانات");
+            currentReseller = u;
+            switchScreen('reseller-screen');
+            document.getElementById('disp-res-code').innerText = u.toUpperCase(); 
+            if(db.users[u].balance===undefined) { db.users[u].balance=230; await saveDB(db); }
+            currentBalance = db.users[u].balance;
+            document.getElementById('balance-amount').innerText = currentBalance.toFixed(2);
+            renderKeys();
+        };
+
+        window.changeCount = function(a) {
+            const inp = document.getElementById('key-count-input');
+            let v = parseInt(inp.value) + a;
+            if(v < 1) v = 1; if(v > 50) v = 50;
+            inp.value = v;
+        };
+
+        window.genKey = async function() {
+            const btn = document.getElementById('gen-btn');
+            const sel = document.getElementById('days');
+            const count = parseInt(document.getElementById('key-count-input').value);
+            const days = parseFloat(sel.value);
+            const price = parseFloat(sel.options[sel.selectedIndex].getAttribute('data-price'));
+            const total = price * count;
+            if(currentBalance < total) return toast("رصيدك غير كافٍ!");
+
+            btn.disabled = true;
+            btn.innerText = "⏳ جاري التوليد...";
+            try {
+                const db = await fetchDB();
+                if(!db.keys) db.keys = {};
+                if(!db.users || !db.users[currentReseller]) throw new Error("الحساب غير موجود");
+
+                const now = Date.now();
+                const codes = [];
+                for(let i=0; i<count; i++) {
+                    const k = `SONIC-XIT-${Math.random().toString(36).substring(2,6).toUpperCase()}-${Math.random().toString(36).substring(2,6).toUpperCase()}`;
+                    db.keys[k] = { days: days, used: false, timeText: days>=1?`${days} Days`:`${days*24} Hours`, createdBy: currentReseller, createdAt: now + i };
+                    codes.push(k);
+                }
+
+                db.users[currentReseller].balance = currentBalance - total;
+                await saveDB(db);
+                currentBalance -= total;
+                document.getElementById('balance-amount').innerText = currentBalance.toFixed(2);
+
+                lastGeneratedCode = codes[0];
+                renderKeys(db);
+                copyText(lastGeneratedCode);
+                toast(`تم توليد ${count} كود بنجاح`);
+            } catch (error) {
+                console.error(error);
+                toast("تعذر التوليد، تحقق من الاتصال وحاول مجدداً");
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "GENERATE KEYS 🔑";
+            }
+        };
+        // دالة تحديد النص عند الضغط عليه
+        window.selectText = function(elementId) {
+            const el = document.getElementById(elementId);
+            const range = document.createRange();
+            range.selectNodeContents(el);
+            const sel = window.getSelection();
+            sel.removeAllRanges();
+            sel.addRange(range);
+        };
+
+        // نسخ متوافق مع Android والمتصفحات التي لا تدعم Clipboard API
+        window.copyText = async function(text) {
+            const value = String(text ?? "");
+            if (!value) {
+                toast("لا يوجد كود لنسخه");
+                return false;
+            }
+
+            // الطريقة الحديثة أولاً
+            try {
+                if (navigator.clipboard && window.isSecureContext) {
+                    await navigator.clipboard.writeText(value);
+                    toast("تم نسخ الكود!");
+                    return true;
+                }
+            } catch (err) {
+                // الانتقال للطريقة الاحتياطية
+            }
+
+            // طريقة احتياطية تعمل في صفحات HTML المحلية غالباً
+            let field;
+            try {
+                field = document.createElement("textarea");
+                field.value = value;
+                field.setAttribute("readonly", "");
+                field.style.position = "fixed";
+                field.style.top = "0";
+                field.style.left = "0";
+                field.style.width = "1px";
+                field.style.height = "1px";
+                field.style.padding = "0";
+                field.style.opacity = "0.01";
+                field.style.fontSize = "16px";
+                field.style.userSelect = "text";
+                field.style.webkitUserSelect = "text";
+                document.body.appendChild(field);
+                field.focus();
+                field.select();
+                field.setSelectionRange(0, field.value.length);
+
+                const copied = document.execCommand("copy");
+                field.remove();
+
+                if (copied) {
+                    toast("تم نسخ الكود!");
+                    return true;
+                }
+            } catch (err) {
+                if (field && field.parentNode) field.remove();
+            }
+
+            // لا نعرض نافذة المتصفح المزعجة عند فشل النسخ داخل عارض الملفات
+            toast("النسخ التلقائي غير مدعوم هنا؛ اضغط مطولاً على الكود لنسخه");
+            return false;
+        };
+
+        window.renderKeys = async function(snapshot) {
+            const list = document.getElementById('keys-list');
+            list.innerHTML = '<div style="text-align:center;padding:10px;">جاري تحميل الأكواد...</div>';
+            const db = snapshot || await fetchDB();
+            list.innerHTML = '';
+            const k = Object.keys(db.keys||{}).filter(x=>db.keys[x].createdBy===currentReseller).sort((a,b)=>db.keys[b].createdAt - db.keys[a].createdAt);
+            document.getElementById('key-count').innerText = k.length;
+            k.forEach((key, i) => {
+                const d = db.keys[key];
+                const div = document.createElement('div'); div.className='key-row';
+                div.innerHTML = `<div>${i+1}</div><div class="key-name">${key}</div><div><span class="key-status ${d.used?'used':''}">${d.used?'مستخدم':'غير مستخدم'}</span></div><div class="key-actions"><button class="icon-btn copy-action" onclick="copyKey('${key}')" title="نسخ الكود">📋 نسخ</button><button class="icon-btn delete-action" onclick="delKey('${key}')" title="حذف الكود">🗑️ حذف</button></div>`;
+                list.appendChild(div);
+            });
+        };
+
+        window.copyKey = function(k) {
+            copyText(k);
+        };
+
+        window.delKey = async function(k) { if(!confirm("حذف؟"))return; const db = await fetchDB(); delete db.keys[k]; await saveDB(db); renderKeys(); };
+        window.deleteAll = async function() { if(!confirm("حذف الكل؟"))return; const db = await fetchDB(); for(let k in db.keys){ if(db.keys[k].createdBy===currentReseller) delete db.keys[k]; } await saveDB(db); renderKeys(); toast("تم الحذف"); };
+        window.logout = function(){ location.reload(); };
+    </script>
+</body>
+</html>
